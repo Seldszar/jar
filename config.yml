@@ -1,0 +1,18 @@
+# The Streamlabs Socket Token
+token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IjQ4ODFBNzJFNjc0M0QxQjE4Q0M2IiwicmVhZF9vbmx5Ijp0cnVlLCJwcmV2ZW50X21hc3RlciI6dHJ1ZSwidHdpdGNoX2lkIjoiMzkyNjY1MzgifQ.2mXwNJWODBNRl4N67cz4RtFnbf0DoseNN50sFyJDXXc"
+
+# The currency which incoming donations will be converted into
+currency: "USD"
+
+# Determine if the test alerts are included
+includeTestAlerts: true
+
+# The logging configuration
+logger:
+  level: "info"
+
+# The files
+files:
+  - name: "total.txt"
+    content: >
+      <%= Math.round(_.get(state, 'total', 0)) %>

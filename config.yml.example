@@ -1,0 +1,11 @@
+# The Streamlabs Socket Token
+token: ""
+
+# The currency which incoming donations will be converted into
+currency: "USD"
+
+# The generated files
+files:
+  - name: "total.txt"
+    content: >
+      <%= Math.round(state.get("total", 0)) %>

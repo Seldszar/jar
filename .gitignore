@@ -1,4 +1,3 @@
-### Node ###
 # Logs
 logs
 *.log
@@ -57,3 +56,9 @@ typings/
 
 # dotenv environment variables file
 .env
+
+# Data directory
+data
+
+# Transpiled files
+dist

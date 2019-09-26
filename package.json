@@ -1,37 +1,50 @@
 {
   "name": "jar",
   "private": true,
-  "bin": "bin/index.js",
+  "main": "dist/index.js",
+  "author": "Alexandre Breteau <contact@seldszar.fr> (https://seldszar.fr)",
+  "description": "Yet another lightweight webhook server",
+  "repository": "seldszar/jar",
+  "license": "MIT",
+  "bin": {
+    "jar": "dist/index.js"
+  },
   "scripts": {
-    "lint": "eslint --format codeframe **/*.js",
-    "lint-staged": "lint-staged"
+    "build": "ncc build src/cli/index.ts --minify --out dist",
+    "release": "npm run build && semantic-release",
+    "start": "ncc run src/cli/index.ts",
+    "test": "eslint --ext .ts src"
   },
   "engine": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "dependencies": {
-    "camelcase-keys": "^4.2.0",
-    "common-tags": "^1.8.0",
-    "fs-plus": "^3.0.2",
-    "hjson": "^3.1.1",
-    "lodash": "^4.17.10",
-    "lowdb": "^1.0.0",
-    "money": "^0.2.0",
-    "signale": "^1.1.0",
-    "socket.io-client": "^2.1.1",
-    "winston": "^3.0.0-rc1",
-    "yargs-parser": "^10.0.0"
+    "camelcase-keys": "^6.0.1",
+    "consola": "^2.10.1",
+    "exit-hook": "^2.2.0",
+    "got": "^9.6.0",
+    "js-yaml": "^3.13.1",
+    "lodash": "^4.17.15",
+    "socket.io-client": "^2.3.0",
+    "strip-indent": "^3.0.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^7.0.0",
-    "@commitlint/config-conventional": "^7.0.1",
-    "babel-eslint": "^8.2.3",
-    "eslint": "^4.19.1",
-    "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-prettier": "^2.6.0",
-    "husky": "^1.0.0-rc.8",
-    "lint-staged": "^7.0.5",
-    "prettier": "^1.12.1"
+    "@commitlint/cli": "^8.0.0",
+    "@commitlint/config-conventional": "^8.0.0",
+    "@types/js-yaml": "^3.12.1",
+    "@types/lodash": "^4.14.141",
+    "@types/socket.io-client": "^1.4.32",
+    "@typescript-eslint/eslint-plugin": "^2.3.2",
+    "@typescript-eslint/parser": "^2.3.2",
+    "@zeit/ncc": "^0.20.5",
+    "eslint": "^6.5.1",
+    "eslint-config-prettier": "^6.3.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "husky": "^3.0.7",
+    "lint-staged": "^9.4.1",
+    "prettier": "^1.18.2",
+    "semantic-release": "^15.13.24",
+    "typescript": "^3.6.3"
   },
   "commitlint": {
     "extends": [
@@ -41,10 +54,13 @@
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-commit": "npm run lint-staged"
+      "pre-commit": "lint-staged"
     }
   },
   "lint-staged": {
-    "*.js": "eslint --format codeframe"
+    "*.ts": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }
