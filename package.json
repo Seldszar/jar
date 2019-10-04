@@ -9,6 +9,10 @@
   "bin": {
     "jar": "dist/index.js"
   },
+  "files": [
+    "dist/index.js",
+    "config.yml.example"
+  ],
   "scripts": {
     "build": "ncc build src/cli/index.ts --minify --out dist",
     "release": "npm run build && semantic-release",
