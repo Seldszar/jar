@@ -7,6 +7,7 @@ import lodash from "lodash";
 import io from "socket.io-client";
 import stripIndent from "strip-indent";
 
+import { EventType } from "./constants";
 import { findSubscriptionPlan } from "./helpers";
 import { State } from "./state";
 
@@ -58,11 +59,11 @@ export default async function main(options: MainOptions): Promise<() => void> {
   });
 
   const shouldHandleMessage = (message: any): boolean => {
-    if (handledMessages.has(message._id)) {
+    if (handledMessages.has(message.id)) {
       return false;
     }
 
-    handledMessages.add(message._id);
+    handledMessages.add(message.id);
 
     if ((!options.includeTestAlerts && message.isTest) || message.repeat || message.forceRepeat) {
       return false;
@@ -88,56 +89,49 @@ export default async function main(options: MainOptions): Promise<() => void> {
       return;
     }
 
-    event.message.forEach((data: any): void => {
-      if (shouldHandleMessage(data)) {
-        emitter.emit("eventReceived", camelcaseKeys({ ...event, data }, { deep: true }));
-      }
+    event = camelcaseKeys(event, {
+      deep: true,
     });
-  });
 
-  emitter.on("eventReceived", (event: any): void => {
-    logger.debug("Event received", { event });
-
-    switch (event.type) {
-      case "bits": {
-        emitter.emit("bitsReceived", {
-          name: event.data.name,
-          amount: Number.parseInt(event.data.amount, 10),
-        });
-
-        break;
+    event.message.forEach((data: any): void => {
+      if (!shouldHandleMessage(data)) {
+        return;
       }
 
-      case "donation": {
-        emitter.emit("donationReceived", {
-          name: event.data.name,
-          currency: event.data.currency,
-          amount: Number.parseFloat(event.data.amount),
-        });
+      logger.debug("New event received", { event });
 
-        break;
-      }
-
-      case "subscription": {
-        const plan = findSubscriptionPlan(event.data.subPlan);
-
-        if (!plan) {
-          logger.warn('Subscription plan "%s" not found', event.data.subPlan, {
-            subscription: event.data,
+      switch (event.type) {
+        case "bits": {
+          emitter.emit(EventType.CHEER, {
+            name: data.name,
+            amount: Number.parseInt(data.amount, 10),
           });
 
-          return;
+          break;
         }
 
-        emitter.emit("subscriptionReceived", {
-          months: event.data.months,
-          name: event.data.name,
-          plan,
-        });
+        case "donation": {
+          emitter.emit(EventType.DONATION, {
+            name: data.name,
+            currency: data.currency,
+            amount: Number.parseFloat(data.amount),
+          });
 
-        break;
+          break;
+        }
+
+        case "resub":
+        case "subscription": {
+          emitter.emit(EventType.SUBSCRIPTION, {
+            name: data.name,
+            months: data.months,
+            plan: findSubscriptionPlan(data.subPlan),
+          });
+
+          break;
+        }
       }
-    }
+    });
   });
 
   state.on("change", newValue => {
@@ -150,7 +144,24 @@ export default async function main(options: MainOptions): Promise<() => void> {
     });
   });
 
-  emitter.on("donationReceived", donation => {
+  emitter.on(EventType.CHEER, cheer => {
+    let { amount } = cheer;
+    const { name } = cheer;
+
+    logger.info("Cheer: %s bit(s) from %s", amount, name, {
+      cheer,
+    });
+
+    amount /= 100;
+
+    if (options.currency) {
+      amount /= rates["USD"];
+    }
+
+    state.update("total", value => value + amount);
+  });
+
+  emitter.on(EventType.DONATION, donation => {
     const { currency, name } = donation;
     let { amount } = donation;
 
@@ -165,30 +176,13 @@ export default async function main(options: MainOptions): Promise<() => void> {
     state.update("total", value => value + amount);
   });
 
-  emitter.on("subscriptionReceived", subscription => {
+  emitter.on(EventType.SUBSCRIPTION, subscription => {
     const { months, name, plan } = subscription;
     let { amount } = plan;
 
     logger.info("Subscription: %s for %d month(s) (%s)", name, months, plan.name, {
       subscription,
     });
-
-    if (options.currency) {
-      amount /= rates["USD"];
-    }
-
-    state.update("total", value => value + amount);
-  });
-
-  emitter.on("bitsReceived", bits => {
-    let { amount } = bits;
-    const { name } = bits;
-
-    logger.info("Cheer: %s bit(s) from %s", amount, name, {
-      bits,
-    });
-
-    amount /= 100;
 
     if (options.currency) {
       amount /= rates["USD"];

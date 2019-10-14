@@ -1,5 +1,11 @@
 import { SubscriptionPlan } from "./types";
 
+export enum EventType {
+  CHEER = "CHEER",
+  DONATION = "DONATION",
+  SUBSCRIPTION = "SUBSCRIPTION",
+}
+
 export const allSubscriptionPlans: Record<string, SubscriptionPlan> = {
   Prime: {
     name: "Twitch Prime Subscription",
