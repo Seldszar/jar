@@ -1,11 +1,13 @@
 import camelcaseKeys from "camelcase-keys";
 import consola from "consola";
 import EventEmitter from "events";
-import fs from "fs";
 import got from "got";
 import lodash from "lodash";
+import makeDir from "make-dir";
+import path from "path";
 import io from "socket.io-client";
 import stripIndent from "strip-indent";
+import writeFileAtomic from "write-file-atomic";
 
 import { EventType } from "./constants";
 import { findSubscriptionPlan } from "./helpers";
@@ -48,7 +50,7 @@ export default async function main(options: MainOptions): Promise<() => void> {
   } = await got.get("https://api.exchangeratesapi.io/latest", {
     json: true,
     query: {
-      base: options.currency,
+      base: typeof options.currency === "string" ? options.currency : undefined,
     },
   });
 
@@ -195,11 +197,13 @@ export default async function main(options: MainOptions): Promise<() => void> {
     const compiled = lodash.template(file.content);
 
     const write = (): void => {
+      const filePath = `data/files/${file.name}`;
       const contents = compiled({
         state,
       });
 
-      fs.writeFileSync(`data/files/${file.name}`, stripIndent(contents));
+      makeDir.sync(path.dirname(filePath));
+      writeFileAtomic.sync(filePath, stripIndent(contents));
     };
 
     fileWriters.add(write);

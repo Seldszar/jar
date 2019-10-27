@@ -23,14 +23,16 @@
     "node": ">=10.0.0"
   },
   "dependencies": {
-    "camelcase-keys": "^6.0.1",
+    "camelcase-keys": "^6.1.0",
     "consola": "^2.10.1",
     "exit-hook": "^2.2.0",
     "got": "^9.6.0",
     "js-yaml": "^3.13.1",
     "lodash": "^4.17.15",
+    "make-dir": "^3.0.0",
     "socket.io-client": "^2.3.0",
-    "strip-indent": "^3.0.0"
+    "strip-indent": "^3.0.0",
+    "write-file-atomic": "^3.0.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^8.0.0",
@@ -39,6 +41,7 @@
     "@types/js-yaml": "^3.12.1",
     "@types/lodash": "^4.14.141",
     "@types/socket.io-client": "^1.4.32",
+    "@types/write-file-atomic": "^2.1.2",
     "@typescript-eslint/eslint-plugin": "^2.4.0",
     "@typescript-eslint/parser": "^2.4.0",
     "@zeit/ncc": "^0.20.5",
@@ -48,7 +51,7 @@
     "husky": "^3.0.7",
     "lint-staged": "^9.4.1",
     "prettier": "^1.18.2",
-    "semantic-release": "^15.13.24",
+    "semantic-release": "^15.13.27",
     "typescript": "^3.6.3"
   },
   "commitlint": {
